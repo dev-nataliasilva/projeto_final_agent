@@ -3,8 +3,12 @@ import subprocess
 import os
 import sys
 import tempfile
-
+from flask import Flask
+from flask_cors import CORS
 app = Flask(__name__)
+
+# Habilitar CORS para todas as rotas e origens
+CORS(app)
 
 @app.route('/start_app', methods=['GET'])
 def start_app():
