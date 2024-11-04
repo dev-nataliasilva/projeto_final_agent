@@ -1,4 +1,5 @@
 import os
+import json  # Importar a biblioteca json
 from tkinter import Tk, filedialog
 from PIL import Image
 import numpy as np
@@ -21,7 +22,7 @@ def calculate_average_rgb(image_path):
         img = img.convert('RGB')  # Garante que a imagem está no formato RGB
         np_img = np.array(img)  # Converte a imagem para um array NumPy
         avg_color = np.mean(np_img, axis=(0, 1))  # Calcula a média RGB
-        return tuple(avg_color.astype(int))  # Retorna como uma tupla de inteiros
+        return [int(value) for value in avg_color]  # Converte cada valor para int
 
 def list_files_recursively(folder_path):
     # Lista todos os arquivos de imagem em uma pasta e suas subpastas
@@ -44,8 +45,8 @@ def list_files():
         files = list_files_recursively(folder_path)
         return files  # Retorna a lista de arquivos e suas médias RGB
     else:
-        return None  # Retorna None se a pasta for inválida
+        return []  # Retorna uma lista vazia se a pasta for inválida
 
 if __name__ == '__main__':
     files = list_files()  # Para testes locais, você pode chamar diretamente
-    print(files)  # Para visualizar os arquivos encontrados e suas médias RGB
+    print(json.dumps(files))  # Imprime a lista como JSON
