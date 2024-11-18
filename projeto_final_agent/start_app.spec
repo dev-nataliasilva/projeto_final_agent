@@ -5,7 +5,7 @@ a = Analysis(
     ['start_app.py'],
     pathex=[],
     binaries=[],
-    datas=[('images/Onde-salvei-lemure-preto.ico', 'images')],
+    datas=[('agent.py', '.'), ('images/Onde-salvei-lemure-preto.ico', 'images')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,5 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='images/Onde-salvei-lemure-preto.ico'
+    icon='images/Onde-salvei-lemure-preto.ico',
 )
