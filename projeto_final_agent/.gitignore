@@ -13,3 +13,4 @@ ehthumbs.db
 
 # Ignorar a pasta build do PyInstaller
 /build/
+/dist/
