@@ -1,11 +1,17 @@
+import os
+import sys
+import threading
+import winreg  # Para manipulação do registro do Windows
+from pystray import Icon, Menu, MenuItem
+from PIL import Image, ImageDraw
 from flask import Flask, jsonify
 import subprocess
-import json  # Importar a biblioteca json
+import json
 from flask_cors import CORS
+from werkzeug.serving import make_server
 
+# Flask App
 app = Flask(__name__)
-
-# Habilitar CORS para todas as rotas e origens
 CORS(app)
 
 @app.route('/start_app', methods=['GET'])
@@ -17,20 +23,14 @@ def start_app():
         # Use subprocess para iniciar a aplicação e capturar a saída
         result = subprocess.run(['python', app_path], capture_output=True, text=True)
 
-        # Verifica se houve erro na execução do script
         if result.returncode != 0:
             return jsonify({"error": result.stderr.strip()}), 500
 
-        # Se não houver erro, pega a saída padrão do script
         files_output = result.stdout.strip()
-
-        # Converte a saída em uma lista (pode ser ajustada conforme necessidade)
         if files_output:
-            # Tenta converter a saída em um objeto JSON
             try:
-                files = json.loads(files_output)  # Converte a saída para um objeto Python
-                
-                return jsonify(files), 200  # Retorna a lista como resposta JSON
+                files = json.loads(files_output)
+                return jsonify(files), 200
             except json.JSONDecodeError:
                 return jsonify({"error": "A saída não é um JSON válido."}), 400
         else:
@@ -39,5 +39,69 @@ def start_app():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+
+# Função para criar o ícone do System Tray
+def on_quit(icon, item):
+    """Encerra o ícone e o servidor Flask."""
+    # Parar o servidor Flask
+    global flask_server
+    if flask_server:
+        flask_server.shutdown()
+
+    icon.stop()  # Encerra o ícone no System Tray
+    sys.exit(0)  # Encerra o programa
+
+
+def run_flask():
+    """Executa o servidor Flask em uma thread separada."""
+    global flask_server
+    flask_server = make_server('0.0.0.0', 5000, app)
+    flask_server.serve_forever()
+
+
+def add_to_startup():
+    """Adiciona o executável à inicialização do Windows."""
+    exe_path = sys.executable  # Caminho do executável Python (ou do executável compilado)
+    key = winreg.HKEY_CURRENT_USER
+    reg_path = r"Software\Microsoft\Windows\CurrentVersion\Run"
+    reg_key = "MyApp"  # Nome para identificar seu aplicativo no registro
+
+    try:
+        # Abre a chave de registro de inicialização
+        with winreg.OpenKey(key, reg_path, 0, winreg.KEY_WRITE) as reg:
+            # Adiciona o caminho do executável à chave de inicialização
+            winreg.SetValueEx(reg, reg_key, 0, winreg.REG_SZ, exe_path)
+            print("Aplicação adicionada à inicialização do Windows.")
+    except Exception as e:
+        print(f"Erro ao adicionar ao registro: {str(e)}")
+
+
+def main():
+    global flask_server
+
+    # Adiciona o executável à inicialização
+    add_to_startup()
+
+    # Executa o Flask em uma thread separada
+    flask_thread = threading.Thread(target=run_flask, daemon=True)
+    flask_thread.start()
+
+    # Configura o menu do System Tray
+    menu = Menu(
+        MenuItem('Abrir', lambda: print("Abrindo a aplicação...")),  # Aqui você pode definir ações reais
+        MenuItem('Sair', on_quit)
+    )
+
+    # Carrega a imagem do ícone a partir do arquivo .ico
+    base_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    icon_path = os.path.join(base_dir, 'images/Onde-salvei-lemure-preto.ico')
+    image = Image.open(icon_path)
+
+    # Configura o ícone no System Tray
+    icon = Icon("MyApp", image, menu=menu)
+    icon.title = "Agente - Onde Salvei?"
+    icon.run()  # Mostra o ícone no System Tray
+
+
+if __name__ == "__main__":
+    main()
