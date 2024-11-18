@@ -88,8 +88,8 @@ def main():
 
     # Configura o menu do System Tray
     menu = Menu(
-        MenuItem('Abrir', lambda: print("Abrindo a aplicação...")),  # Aqui você pode definir ações reais
-        MenuItem('Sair', on_quit)
+        MenuItem('Está ativo!', lambda: print("A aplicação está ativa.")),  # Exibe uma opção com o texto "Está ativo!"
+        MenuItem('Sair', on_quit)  # Continua com a opção "Sair"
     )
 
     # Carrega a imagem do ícone a partir do arquivo .ico
