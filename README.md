@@ -36,5 +36,5 @@ Isso gerará o executável na pasta dist/.
 ### 📝 Licença
 Este projeto está sob a licença MIT. Sinta-se livre para utilizá-lo e modificá-lo conforme necessário.
 
-### 📝 Objetivo
+### 🎓 Objetivo
 Este código integra o ecossistema do produto _Onde Salvei?_, desenvolvido como parte do Projeto de Conclusão de Curso da graduação em Ciência da Computação.
